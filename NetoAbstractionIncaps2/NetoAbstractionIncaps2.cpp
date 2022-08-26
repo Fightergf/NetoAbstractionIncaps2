@@ -29,23 +29,70 @@ public:
     {
         return Country + ", " + Street + ", " + std::to_string(home) + ", " + std::to_string(room);
     }  //Сборка строки
+    void sortAdress(Address *arrADR, int countadr)
+    {
+        std::string* sM = new std::string[countadr];
+
+        for (int i = 0; i < countadr; i++)
+        {
+            sM[i] = arrADR[i].get_output_address();
+        }
+
+        int res = 0;
+        int listLength = countadr;
+
+        while (listLength--) //Cортировка по алфавиту и сравнение строк
+        {
+            bool swapped = false;
+            for (int i = 0; i < listLength; i++)
+            {
+                res = sM[i].compare(0, 2, sM[i + 1]); //Сравнение строк
+                if (res == 1)
+                {
+                    std::swap(sM[i], sM[i + 1]);
+                    swapped = true;
+                }
+            }
+            if (swapped == false)
+                break;
+        }
+        delete[] arrADR;
+        writeFile(sM, countadr);
+    }
+    void writeFile(std::string *sM, int countadr) //Запись в файл
+    {
+        std::ofstream filew("out.txt");
+
+        filew << countadr << "\n";
+
+        for (int i = 0; i < countadr; i++) 
+        {
+            filew << sM[i] + "\n";
+        }
+        delete[] sM;  //Очистка массива строк
+        std::cout << "Файл записан успешно, проверьте!!!";
+    }
 };
 
-int out_file(Address* arrADR)
+void out_file()
 {
     std::ifstream filer("in.txt");
+
     std::string Country;
     std::string Street;
     int home = 0;
     int room = 0;
     int countAddress = 0;
+    Address ADR;
 
     if (filer.is_open())
     {
         std::cout << "Файл успешно открыт!!!" << std::endl;
         filer >> countAddress;
         int iter = 0;
-        std::cout << countAddress << "\n";
+        std::cout << countAddress << "Адрессов в наличии!\n";
+
+        Address* arrADR = new Address[countAddress]; //din memory struct
 
         for (int i = 0; i < countAddress; i++) //Внесение адресов в массив структур
         {
@@ -56,59 +103,14 @@ int out_file(Address* arrADR)
             arrADR[iter] = Address(Country, Street, home, room);
             iter++;
         }
+        ADR.sortAdress(arrADR, countAddress);
     }
     else
     {
         std::cout << "Не получилось открыть файл!" << std::endl;
     }
     filer.close();
-    return countAddress;
 }
-
-void writeFile(Address *arrADR, int countadr)
-{
-    std::ofstream filew("out.txt");
-
-    std::string s1; //= arrADR[0].get_output_address(); А если будет больше адресов? как возможно сделать?
-    std::string s2; //= arrADR[1].get_output_address(); не обьявлять же 100 переменных (строк)
-    std::string s3; //= arrADR[2].get_output_address();
-    std::string s4; //= arrADR[3].get_output_address();
-    std::string s5; //= arrADR[4].get_output_address();
-
-    std::string sM[5] = {s1, s2, s3, s4, s5}; //Массив строк
-
-    for (int i = 0; i < countadr - 1; i++) //Перенос из массива структур в массивы строк
-    {
-        sM[i+1] = arrADR[i].get_output_address();
-    }
-
-    int res = 0;
-    int listLength = countadr;
-
-    while (listLength--) //Cортировка по алфавиту и сравнение строк
-    {
-        bool swapped = false;
-        for (int i = 0; i < listLength; i++)
-        {
-            res = sM[i].compare(0, 2, sM[i+1]); //Сравнение строк
-            if (res == 1)
-            {
-                std::swap(sM[i], sM[i + 1]);
-                swapped = true;
-            }
-        }
-        if (swapped == false)
-            break;
-    }
-    filew << countadr;
-
-    for (int i = 0; i < 5; i++) //Запись в файл
-    {
-        filew << sM[i] + "\n";
-    }
-    std::cout << "Файл записан успешно, проверьте!!!";
-}
-
 
 
 int main()
@@ -116,10 +118,7 @@ int main()
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
-    Address* arrADR = new Address[5];
-    int countadr = out_file(arrADR);
+    out_file();
 
-    writeFile(arrADR, countadr);
-    delete[] arrADR;
-    return 1;
+    return 0;
 }
